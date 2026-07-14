@@ -2,7 +2,7 @@
 
 ## 状态
 
-开发中
+已完成
 
 ## 目标
 
@@ -93,27 +93,29 @@
 
 ## 验收标准
 
-- [ ] 有效 `assets:write` Token 可以上传素材。
-- [ ] 缺少 Token、Scope 或 Idempotency-Key 被拒绝。
-- [ ] 非 Multipart、缺少字段、空文件、超大文件和非法图片被拒绝。
-- [ ] 上传文件只存 R2，D1 只保存元数据。
-- [ ] 首次 external_id 创建素材并返回 `/media/{UUID}`。
-- [ ] 相同 external_id 和相同内容返回 unchanged。
-- [ ] 相同 external_id 但内容或访问级别不同返回 409。
-- [ ] 已删除 external_id 不会被自动复用。
-- [ ] 相同幂等请求重放原响应。
-- [ ] 幂等键内容冲突返回 409。
-- [ ] D1 失败时删除本次 R2 Object。
-- [ ] 并发幂等冲突不会留下孤儿 R2 Object。
-- [ ] 查询接口只能读取当前 Client 自己上传的素材。
-- [ ] API 响应和日志不返回 R2 Object Key。
-- [ ] 审计日志不保存文件字节、Token 或 Authorization Header。
-- [ ] curl 文档可直接替换 Token 和文件路径执行。
-- [ ] 自动化测试覆盖元数据、稳定哈希、created/unchanged/conflict 和 deleted 策略。
-- [ ] Lint、Typecheck、Vitest、Migration 零漂移、两次 D1 Migration、Next.js Build 和 OpenNext Build 全部通过。
+- [x] 有效 `assets:write` Token 可以进入经过鉴权的上传链路。
+- [x] 缺少 Token、Scope 或 Idempotency-Key 被拒绝。
+- [x] 非 Multipart、缺少字段、空文件、超大文件和非法图片被拒绝。
+- [x] 上传服务只把文件字节写入 R2，D1 只保存元数据。
+- [x] 首次 external_id 创建素材并返回 `/media/{UUID}`。
+- [x] 相同 external_id 和相同内容返回 unchanged。
+- [x] 相同 external_id 但内容或访问级别不同返回 409。
+- [x] 已删除 external_id 不会被自动复用。
+- [x] 相同幂等请求重放原响应。
+- [x] 幂等键内容冲突返回 409。
+- [x] D1 失败时执行本次 R2 Object 补偿删除。
+- [x] 并发幂等冲突在 R2 补偿后重放已提交响应。
+- [x] 查询接口只能读取当前 Client 自己上传的素材。
+- [x] API 响应和日志不返回 R2 Object Key。
+- [x] 审计日志不保存文件字节、Token 或 Authorization Header。
+- [x] curl 文档可直接替换 Token 和文件路径执行。
+- [x] 自动化测试覆盖元数据、稳定哈希、created/unchanged/conflict 和 deleted 策略。
+- [x] Lint、Typecheck、Vitest、Migration 零漂移、两次 D1 Migration、Next.js Build 和 OpenNext Build 全部通过。
+
+> 当前完成代码级、策略级、迁移级和 Cloudflare 构建级验收。真实 Cloudflare R2 桶上的 curl E2E 会在生产资源创建与部署验收任务中执行。
 
 ## 分支与 PR
 
 - 分支：`task/010-hermes-asset-import`
-- Pull Request：待创建
+- Pull Request：#12
 - 验收通过后转为 Ready 并合并，再进入 TASK-011
