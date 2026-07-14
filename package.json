@@ -11,6 +11,8 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "cf:build": "opennextjs-cloudflare build",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
@@ -19,14 +21,15 @@
     "db:check": "drizzle-kit check",
     "db:migrate:local": "wrangler d1 migrations apply research-community-hub --local",
     "db:migrate:remote": "wrangler d1 migrations apply research-community-hub --remote",
-    "check": "npm run lint && npm run typecheck && npm run db:check && npm run build && npm run cf:build"
+    "check": "npm run lint && npm run typecheck && npm run test && npm run db:check && npm run build && npm run cf:build"
   },
   "dependencies": {
     "@opennextjs/cloudflare": "1.20.1",
     "drizzle-orm": "0.45.2",
     "next": "16.2.10",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "zod": "4.4.3"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "5.20260714.1",
@@ -37,6 +40,7 @@
     "eslint": "^9.0.0",
     "eslint-config-next": "16.2.10",
     "typescript": "5.9.3",
+    "vitest": "4.1.10",
     "wrangler": "4.110.0"
   }
 }
