@@ -43,6 +43,13 @@
       "when": 1784037356498,
       "tag": "0005_absent_angel",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1784039732590,
+      "tag": "0006_spooky_swarm",
+      "breakpoints": true
     }
   ]
 }
