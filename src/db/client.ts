@@ -3,10 +3,12 @@ import { drizzle } from "drizzle-orm/d1";
 
 import * as assetSchema from "./assets-schema";
 import * as coreSchema from "./schema";
+import * as reportSchema from "./reports-schema";
 
 const schema = {
   ...coreSchema,
   ...assetSchema,
+  ...reportSchema,
 };
 
 export function createDb(binding: D1Database) {

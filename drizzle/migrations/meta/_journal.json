@@ -22,6 +22,13 @@
       "when": 1784032043509,
       "tag": "0003_parched_junta",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1784034521492,
+      "tag": "0003_special_brother_voodoo",
+      "breakpoints": true
     }
   ]
 }
