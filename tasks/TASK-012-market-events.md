@@ -2,7 +2,7 @@
 
 ## 状态
 
-开发中
+已完成
 
 ## 目标
 
@@ -119,24 +119,26 @@
 
 ## 验收标准
 
-- [ ] Migration 可在空数据库应用并可重复执行迁移命令。
-- [ ] 管理员可创建、筛选、读取和编辑事件。
-- [ ] 非管理员、未登录或跨源写请求被拒绝。
-- [ ] 日期、时间范围、时区、分类和重要性错误返回字段级错误。
-- [ ] 管理员 PATCH 不能直接修改状态。
-- [ ] 发布和归档记录审计日志。
-- [ ] 有效 `events:write` Token 可以导入事件。
-- [ ] external_id 首次创建、变化更新、不变 unchanged。
-- [ ] 审核开关正确决定 pending_review 或 published。
-- [ ] 相同 Idempotency-Key 重放原响应，不同请求返回 409。
-- [ ] 失败请求写入导入日志且不保存完整请求体或 Token。
-- [ ] external_id 查询仅能读取当前 Client 自己的事件。
-- [ ] curl 文档可直接替换 Token 和 JSON 文件执行。
-- [ ] 自动化测试覆盖日期、时间范围、字段规范化、哈希和动作决策。
-- [ ] Lint、Typecheck、Vitest、Migration 零漂移、两次 D1 Migration、Next.js Build 和 OpenNext Build 全部通过。
+- [x] Migration 可在空数据库应用并可重复执行迁移命令。
+- [x] 管理员可创建、筛选、读取和编辑事件。
+- [x] 非管理员、未登录或跨源写请求被拒绝。
+- [x] 日期、时间范围、时区、分类和重要性错误返回字段级错误。
+- [x] 管理员 PATCH 不能直接修改状态。
+- [x] 发布和归档记录审计日志。
+- [x] 有效 `events:write` Token 可以导入事件。
+- [x] external_id 首次创建、变化更新、不变 unchanged。
+- [x] 审核开关正确决定 pending_review 或 published。
+- [x] 相同 Idempotency-Key 重放原响应，不同请求返回 409。
+- [x] 失败请求写入导入日志且不保存完整请求体或 Token。
+- [x] external_id 查询仅能读取当前 Client 自己的事件。
+- [x] curl 文档可直接替换 Token 和 JSON 文件执行。
+- [x] 自动化测试覆盖日期、时间范围、字段规范化、哈希和动作决策。
+- [x] Lint、Typecheck、Vitest、Migration 零漂移、两次 D1 Migration、Next.js Build 和 OpenNext Build 全部通过。
+
+> 本任务完成事件模型、管理员 API 与 Hermes 导入的代码级和 Cloudflare 构建级验收。前台周度事件表将在 TASK-013 接入。
 
 ## 分支与 PR
 
 - 分支：`task/012-market-events`
-- Pull Request：待创建
+- Pull Request：#14
 - 验收通过后转为 Ready 并合并，再进入 TASK-013 前台事件日历
