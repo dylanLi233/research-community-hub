@@ -129,8 +129,9 @@ export function validateDeployConfig(config, options = {}) {
 
     for (const field of ["database_id", "preview_database_id"]) {
       const value = database[field];
+      const isAllowedPlaceholder = allowPlaceholders && value === ZERO_UUID;
 
-      if (!isValidUuid(value)) {
+      if (!isAllowedPlaceholder && !isValidUuid(value)) {
         errors.push(`D1 ${field} 必须是有效 UUID`);
       } else if (!allowPlaceholders && value === ZERO_UUID) {
         errors.push(
