@@ -17,6 +17,13 @@
       "migrations_dir": "drizzle/migrations"
     }
   ],
+  "r2_buckets": [
+    {
+      "binding": "ASSETS_BUCKET",
+      "bucket_name": "research-community-hub-assets",
+      "preview_bucket_name": "research-community-hub-assets-preview"
+    }
+  ],
   "observability": {
     "enabled": true
   }
