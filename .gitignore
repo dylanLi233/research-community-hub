@@ -15,6 +15,7 @@
 !.env.example
 .dev.vars
 .dev.vars.*
+!.dev.vars.example
 
 # testing and coverage
 /coverage
