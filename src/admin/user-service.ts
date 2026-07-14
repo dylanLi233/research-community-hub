@@ -4,6 +4,7 @@ import {
   count,
   desc,
   eq,
+  isNull,
   like,
   or,
   type SQL,
@@ -371,7 +372,7 @@ export async function updateAdminUser(
     await db
       .update(sessions)
       .set({ revokedAt: now })
-      .where(and(eq(sessions.userId, targetUserId), eq(sessions.revokedAt, null)));
+      .where(and(eq(sessions.userId, targetUserId), isNull(sessions.revokedAt)));
   }
 
   await writeAuditLog(db, {
@@ -430,7 +431,7 @@ export async function resetAdminUserPassword(
   await db
     .update(sessions)
     .set({ revokedAt: now })
-    .where(and(eq(sessions.userId, targetUserId), eq(sessions.revokedAt, null)));
+    .where(and(eq(sessions.userId, targetUserId), isNull(sessions.revokedAt)));
   await writeAuditLog(db, {
     actorType: "user",
     actorId: actorUserId,
@@ -458,7 +459,7 @@ export async function revokeAdminUserSessions(
   await db
     .update(sessions)
     .set({ revokedAt: now })
-    .where(and(eq(sessions.userId, targetUserId), eq(sessions.revokedAt, null)));
+    .where(and(eq(sessions.userId, targetUserId), isNull(sessions.revokedAt)));
   await writeAuditLog(db, {
     actorType: "user",
     actorId: actorUserId,
