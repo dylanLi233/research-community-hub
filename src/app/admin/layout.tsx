@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import "./admin.css";
+import "./assets/assets.css";
 import { getServerSession } from "@/auth/authorization";
 
 export default async function AdminLayout({
