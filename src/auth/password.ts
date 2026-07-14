@@ -35,12 +35,12 @@ async function derivePassword(
     false,
     ["deriveBits"],
   );
-
+  const workerSafeSalt = Uint8Array.from(salt);
   const bits = await crypto.subtle.deriveBits(
     {
       name: "PBKDF2",
       hash: "SHA-256",
-      salt,
+      salt: workerSafeSalt,
       iterations,
     },
     key,
