@@ -15,6 +15,13 @@
       "when": 1784029498053,
       "tag": "0001_giant_jane_foster",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1784032043509,
+      "tag": "0003_parched_junta",
+      "breakpoints": true
     }
   ]
 }
