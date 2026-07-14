@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   evaluateLoginRateLimit,
   nextLoginFailureState,
+  type LoginRateState,
 } from "./rate-limit";
 import { LOGIN_BLOCK_MS, LOGIN_MAX_FAILURES } from "./constants";
 
@@ -22,13 +23,17 @@ describe("login rate-limit policy", () => {
   });
 
   it("blocks after the configured threshold", () => {
-    let state = null;
+    let state: LoginRateState | null = null;
 
     for (let index = 0; index < LOGIN_MAX_FAILURES; index += 1) {
       state = nextLoginFailureState(
         state,
         new Date(start.getTime() + index * 1_000),
       );
+    }
+
+    if (!state) {
+      throw new Error("Expected a rate-limit state after login failures");
     }
 
     expect(state.blockedUntil).toEqual(
