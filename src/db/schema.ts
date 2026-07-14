@@ -96,6 +96,25 @@ export const sessions = sqliteTable(
   ],
 );
 
+export const authRateLimits = sqliteTable(
+  "auth_rate_limits",
+  {
+    keyHash: text("key_hash").primaryKey(),
+    failureCount: integer("failure_count").notNull().default(0),
+    windowStartedAt: timestampMs("window_started_at").notNull(),
+    blockedUntil: timestampMs("blocked_until"),
+    updatedAt: timestampMs("updated_at").notNull().default(nowMs),
+  },
+  (table) => [
+    index("auth_rate_limits_blocked_until_idx").on(table.blockedUntil),
+    index("auth_rate_limits_updated_at_idx").on(table.updatedAt),
+    check(
+      "auth_rate_limits_failure_count_check",
+      sql`${table.failureCount} >= 0`,
+    ),
+  ],
+);
+
 export const appSettings = sqliteTable(
   "app_settings",
   {
@@ -281,6 +300,7 @@ export type Membership = typeof memberships.$inferSelect;
 export type NewMembership = typeof memberships.$inferInsert;
 export type Session = typeof sessions.$inferSelect;
 export type NewSession = typeof sessions.$inferInsert;
+export type AuthRateLimit = typeof authRateLimits.$inferSelect;
 export type ApiClient = typeof apiClients.$inferSelect;
 export type NewApiClient = typeof apiClients.$inferInsert;
 export type ApiToken = typeof apiTokens.$inferSelect;
