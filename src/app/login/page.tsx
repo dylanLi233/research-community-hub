@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
 import { LoginForm } from "@/components/auth/login-form";
 
@@ -16,7 +17,9 @@ export default function LoginPage() {
           <h1 id="login-title">登录投研内容平台</h1>
           <p>账号由社群管理员创建。登录后可以查看对应权限的完整内容。</p>
         </div>
-        <LoginForm />
+        <Suspense fallback={<p className="form-status">正在加载登录表单…</p>}>
+          <LoginForm />
+        </Suspense>
       </section>
     </main>
   );
