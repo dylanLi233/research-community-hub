@@ -18,9 +18,9 @@ const modules = [
   },
   {
     title: "宏观课程",
-    description: "通过结构化章节建立宏观经济和资产价格分析的基础框架。",
-    href: null,
-    status: "建设中",
+    description: "通过结构化章节建立宏观经济、政策和资产价格分析的基础框架。",
+    href: "/courses",
+    status: "已开放",
   },
 ];
 
@@ -42,10 +42,13 @@ export default function Home() {
             <Link className="secondary-link" href="/events">
               查看本周重要事件
             </Link>
+            <Link className="secondary-link" href="/courses">
+              进入宏观课程
+            </Link>
           </div>
           <div className="status" aria-label="项目状态">
             <span className="status-dot" aria-hidden="true" />
-            研报阅读与重要事件时间表已开放
+            研报、重要事件与宏观课程三大模块已开放
           </div>
         </section>
 
@@ -55,11 +58,9 @@ export default function Home() {
               <span className="module-status">{module.status}</span>
               <h2>{module.title}</h2>
               <p>{module.description}</p>
-              {module.href ? (
-                <Link className="module-link" href={module.href}>
-                  进入模块 <span aria-hidden="true">→</span>
-                </Link>
-              ) : null}
+              <Link className="module-link" href={module.href}>
+                进入模块 <span aria-hidden="true">→</span>
+              </Link>
             </article>
           ))}
         </section>
