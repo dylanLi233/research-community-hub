@@ -17,6 +17,7 @@ export const assets = sqliteTable(
   "assets",
   {
     id: text("id").primaryKey(),
+    externalId: text("external_id"),
     originalFilename: text("original_filename").notNull(),
     storageKey: text("storage_key").notNull(),
     mimeType: text("mime_type", {
@@ -45,7 +46,12 @@ export const assets = sqliteTable(
   },
   (table) => [
     uniqueIndex("assets_storage_key_unique").on(table.storageKey),
+    uniqueIndex("assets_api_client_external_id_unique").on(
+      table.uploadedByApiClientId,
+      table.externalId,
+    ),
     index("assets_created_at_idx").on(table.createdAt),
+    index("assets_external_id_idx").on(table.externalId),
     index("assets_sha256_idx").on(table.sha256),
     index("assets_access_status_idx").on(table.accessLevel, table.status),
     index("assets_uploaded_by_user_id_idx").on(table.uploadedByUserId),

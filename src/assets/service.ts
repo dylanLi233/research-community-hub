@@ -12,6 +12,7 @@ export type AssetStatus = "active" | "deleted";
 
 export type AssetView = {
   id: string;
+  externalId: string | null;
   originalFilename: string;
   mimeType: AssetMimeType;
   sizeBytes: number;
@@ -33,6 +34,7 @@ export type AssetRecord = AssetView & {
 function toAssetView(row: typeof assets.$inferSelect): AssetView {
   return {
     id: row.id,
+    externalId: row.externalId,
     originalFilename: row.originalFilename,
     mimeType: row.mimeType,
     sizeBytes: row.sizeBytes,
@@ -82,6 +84,7 @@ export async function createAdminAsset(
     await db.batch([
       db.insert(assets).values({
         id: assetId,
+        externalId: null,
         originalFilename: input.file.originalFilename,
         storageKey,
         mimeType: input.file.mimeType,
@@ -123,6 +126,7 @@ export async function createAdminAsset(
 
   return {
     id: assetId,
+    externalId: null,
     originalFilename: input.file.originalFilename,
     mimeType: input.file.mimeType,
     sizeBytes: input.file.sizeBytes,
