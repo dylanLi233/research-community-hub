@@ -33,6 +33,7 @@ const ALLOWED_HTML: NonNullable<IFilterXSSOptions["whiteList"]> = {
   pre: [],
 };
 
+const ALLOWED_TAG_NAMES = new Set(Object.keys(ALLOWED_HTML));
 const STRIP_TAG_BODIES = [
   "script",
   "style",
@@ -54,6 +55,7 @@ const MEDIA_URL_PATTERN =
   /^\/media\/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const UNSAFE_URL_CHARACTER_PATTERN = /[\u0000-\u0020\u007f\\]/;
 const ENCODED_URL_TOKEN_PATTERN = /&(?:#x?[0-9a-f]+|[a-z][a-z0-9]+);/i;
+const HTML_TAG_PATTERN = /<\/?\s*([a-z][a-z0-9:-]*)\b[^>]*>/gi;
 
 function warningKey(warning: HtmlSanitizeWarning): string {
   return `${warning.code}:${warning.tag ?? ""}:${warning.attribute ?? ""}`;
@@ -74,6 +76,19 @@ function deduplicateWarnings(
     seen.add(key);
     return true;
   });
+}
+
+function collectIgnoredTagWarnings(
+  rawHtml: string,
+  warnings: HtmlSanitizeWarning[],
+): void {
+  for (const match of rawHtml.matchAll(HTML_TAG_PATTERN)) {
+    const tag = match[1]?.toLowerCase();
+
+    if (tag && !ALLOWED_TAG_NAMES.has(tag)) {
+      warnings.push({ code: "HTML_TAG_REMOVED", tag });
+    }
+  }
 }
 
 function isSafeLinkUrl(value: string): boolean {
@@ -128,16 +143,14 @@ export type SanitizedHtml = {
 
 export function sanitizeHtmlSegment(rawHtml: string): SanitizedHtml {
   const warnings: HtmlSanitizeWarning[] = [];
+  collectIgnoredTagWarnings(rawHtml, warnings);
+
   const html = xss(rawHtml, {
     whiteList: ALLOWED_HTML,
     stripIgnoreTag: true,
     stripIgnoreTagBody: STRIP_TAG_BODIES,
     allowCommentTag: false,
     css: false,
-    onIgnoreTag(tag: string) {
-      warnings.push({ code: "HTML_TAG_REMOVED", tag });
-      return "";
-    },
     onIgnoreTagAttr(tag: string, attribute: string) {
       warnings.push({ code: "HTML_ATTRIBUTE_REMOVED", tag, attribute });
       return "";
