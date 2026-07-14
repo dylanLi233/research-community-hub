@@ -6,7 +6,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   verify:
@@ -15,9 +15,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
-          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -56,17 +53,6 @@ jobs:
 
       - name: Generate Drizzle migrations
         run: npm run db:generate
-
-      - name: Commit generated TASK-005 migration
-        if: github.event_name == 'pull_request' && github.head_ref == 'task/005-r2-asset-foundation'
-        run: |
-          if [ -n "$(git status --porcelain -- drizzle/migrations)" ]; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add drizzle/migrations
-            git commit -m "db: generate assets migration snapshot"
-            git push origin HEAD:${{ github.head_ref }}
-          fi
 
       - name: Verify generated migrations are committed
         run: test -z "$(git status --porcelain -- drizzle/migrations)"
