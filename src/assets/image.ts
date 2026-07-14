@@ -137,7 +137,7 @@ function parseJpeg(bytes: Uint8Array): SupportedImage | null {
 
 function parseWebp(bytes: Uint8Array): SupportedImage | null {
   if (
-    bytes.length < 30 ||
+    bytes.length < 16 ||
     ascii(bytes, 0, 4) !== "RIFF" ||
     ascii(bytes, 8, 4) !== "WEBP"
   ) {
@@ -149,10 +149,13 @@ function parseWebp(bytes: Uint8Array): SupportedImage | null {
   let height = 0;
 
   if (chunkType === "VP8X") {
+    if (bytes.length < 30) {
+      throw new AssetValidationError("INVALID_IMAGE", "WebP Extended 文件头无效");
+    }
     width = readUint24LE(bytes, 24) + 1;
     height = readUint24LE(bytes, 27) + 1;
   } else if (chunkType === "VP8L") {
-    if (bytes[20] !== 0x2f || bytes.length < 25) {
+    if (bytes.length < 25 || bytes[20] !== 0x2f) {
       throw new AssetValidationError("INVALID_IMAGE", "WebP Lossless 文件头无效");
     }
 
