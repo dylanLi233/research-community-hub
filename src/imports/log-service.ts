@@ -73,6 +73,8 @@ export async function recordImportFailure(
     requestHash: string;
     endpoint: string;
     externalId?: string | null;
+    contentType?: string;
+    resourceType?: string;
     httpStatus: number;
     errorCode: string;
     responseData: ImportResponseBody;
@@ -81,6 +83,8 @@ export async function recordImportFailure(
 ): Promise<string> {
   const requestId = input.requestId ?? generateId();
   const now = new Date();
+  const contentType = input.contentType ?? "research_report";
+  const resourceType = input.resourceType ?? contentType;
 
   await db.batch([
     db.insert(importRequests).values({
@@ -90,11 +94,11 @@ export async function recordImportFailure(
       requestHash: input.requestHash,
       endpoint: input.endpoint,
       externalId: input.externalId ?? null,
-      contentType: "research_report",
+      contentType,
       result: "failure",
       httpStatus: input.httpStatus,
       errorCode: input.errorCode,
-      resourceType: "research_report",
+      resourceType,
       durationMs: input.durationMs,
       createdAt: now,
     }),
