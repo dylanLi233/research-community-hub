@@ -49,7 +49,23 @@ jobs:
           exit 1
 
       - name: Unit tests
-        run: npm run test
+        id: tests
+        continue-on-error: true
+        run: npm run test > test.log 2>&1
+
+      - name: Upload unit test errors
+        if: steps.tests.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-errors
+          path: test.log
+          retention-days: 1
+
+      - name: Fail on unit test errors
+        if: steps.tests.outcome == 'failure'
+        run: |
+          cat test.log
+          exit 1
 
       - name: Generate Drizzle migrations
         run: npm run db:generate
