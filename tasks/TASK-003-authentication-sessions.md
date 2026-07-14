@@ -2,7 +2,7 @@
 
 ## 状态
 
-验收中
+已完成
 
 ## 目标
 
@@ -79,10 +79,10 @@
 - [x] 密码、Token、限流和跳转规则有自动化测试。
 - [x] 首管理员 Bootstrap 只允许空数据库并使用 Secret 鉴权。
 - [x] Migration 已由 Drizzle 生成，可在本地 D1 连续应用两次。
-- [ ] 最终只读 CI 的 Lint、Typecheck、Vitest、Next.js Build、OpenNext Build 全部通过。
+- [x] 最终只读 CI 的 Lint、Typecheck、Vitest、Next.js Build、OpenNext Build 全部通过。
 
 ## 分支与 PR
 
 - 分支：`task/003-authentication-sessions`
 - Pull Request：#3
-- 最终 CI 通过后转为 Ready 并合并，再进入 TASK-004
+- 验收通过后转为 Ready 并合并，再进入 TASK-004
