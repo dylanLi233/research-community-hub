@@ -17,6 +17,12 @@
       "migrations_dir": "drizzle/migrations"
     }
   ],
+  "r2_buckets": [
+    {
+      "binding": "MEDIA_BUCKET",
+      "bucket_name": "research-community-hub-media"
+    }
+  ],
   "observability": {
     "enabled": true
   }
