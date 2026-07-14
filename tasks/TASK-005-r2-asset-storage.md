@@ -2,7 +2,7 @@
 
 ## 状态
 
-开发中
+生成数据库迁移中
 
 ## 目标
 
@@ -82,5 +82,5 @@
 ## 分支与 PR
 
 - 分支：`task/005-r2-asset-storage`
-- 独立 Draft Pull Request
+- Pull Request：#6
 - 验收通过后合并，再进入 TASK-006
