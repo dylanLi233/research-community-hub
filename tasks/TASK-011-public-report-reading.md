@@ -2,7 +2,7 @@
 
 ## 状态
 
-开发中
+已完成
 
 ## 目标
 
@@ -69,25 +69,27 @@
 
 ## 验收标准
 
-- [ ] `/reports` 只展示当前可公开访问的已发布研报。
-- [ ] private、draft、pending_review、rejected、archived、deleted 和未来预约内容不展示。
-- [ ] public 研报访客可阅读全文。
-- [ ] member 研报访客只能看到公开试读或摘要。
-- [ ] 有效会员可查看完整 member 正文。
-- [ ] 过期、未开始和 inactive 会员无法查看完整正文。
-- [ ] 管理员可查看完整 member 正文。
-- [ ] mustChangePassword 用户被引导到修改密码。
-- [ ] 未授权 HTML 中不存在付费墙后的内容。
-- [ ] 页面不展示 R2 Object Key、内容哈希或内部导入字段。
-- [ ] SEO metadata 不包含会员正文。
-- [ ] 详情页使用 no-store / Cookie 隔离策略。
-- [ ] 页面在移动端可阅读，图片和表格不溢出视口。
-- [ ] 首页和全站导航可进入研报列表。
-- [ ] 自动化测试覆盖公开可见性和受众决策。
-- [ ] Lint、Typecheck、Vitest、Migration 零漂移、两次 D1 Migration、Next.js Build 和 OpenNext Build 全部通过。
+- [x] `/reports` 只展示当前可公开访问的已发布研报。
+- [x] private、draft、pending_review、rejected、archived、deleted 和未来预约内容不展示。
+- [x] public 研报访客可阅读全文。
+- [x] member 研报访客只能看到公开试读或摘要。
+- [x] 有效会员可查看完整 member 正文。
+- [x] 过期、未开始和 inactive 会员无法查看完整正文。
+- [x] 管理员可查看完整 member 正文。
+- [x] mustChangePassword 用户被引导到修改密码。
+- [x] 未授权 HTML 中不存在付费墙后的内容。
+- [x] 页面不展示 R2 Object Key、内容哈希或内部导入字段。
+- [x] SEO metadata 不包含会员正文。
+- [x] 详情页使用 no-store / Cookie 隔离策略。
+- [x] 页面在移动端可阅读，图片和表格不溢出视口。
+- [x] 首页和全站导航可进入研报列表。
+- [x] 自动化测试覆盖公开可见性、受众决策和付费墙后 HTML 泄露边界。
+- [x] Lint、Typecheck、Vitest、Migration 零漂移、两次 D1 Migration、Next.js Build 和 OpenNext Build 全部通过。
+
+> 本任务完成代码级和 Cloudflare 构建级验收。真实会员、过期会员和管理员账号的浏览器 E2E 将在部署验收任务中执行。
 
 ## 分支与 PR
 
 - 分支：`task/011-public-report-reading`
-- Pull Request：待创建
+- Pull Request：#13
 - 验收通过后转为 Ready 并合并，再进入 TASK-012
