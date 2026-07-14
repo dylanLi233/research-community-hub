@@ -2,7 +2,7 @@
 
 ## 状态
 
-开发中
+已完成
 
 ## 目标
 
@@ -70,24 +70,26 @@
 
 ## 验收标准
 
-- [ ] 管理员可创建 API Client 并设置 Scope。
-- [ ] Client 名称唯一，冲突返回明确错误。
-- [ ] 管理员可禁用 Client 和调整 Scope。
-- [ ] 管理员可创建 Token，响应只在本次返回明文。
-- [ ] Token 列表不返回明文或哈希。
-- [ ] 管理员可撤销 Token，重复撤销保持幂等。
-- [ ] 有效 Token 与正确 Scope 可通过鉴权。
-- [ ] 无效、撤销、过期或禁用 Client Token 被统一拒绝。
-- [ ] Scope 不足返回 `SCOPE_DENIED`。
-- [ ] 成功鉴权更新 `last_used_at`。
-- [ ] 审核模式缺失时读取为 `on`。
-- [ ] 管理员可在 `on` 和 `off` 间切换审核模式。
-- [ ] API Token 明文、哈希和 Authorization Header 不进入审计日志。
-- [ ] 自动化测试覆盖 Token 格式、Bearer 解析、Scope 和审核模式策略。
-- [ ] Lint、Typecheck、Vitest、Migration 零漂移、两次 D1 Migration、Next.js Build 和 OpenNext Build 全部通过。
+- [x] 管理员可创建 API Client 并设置 Scope。
+- [x] Client 名称唯一，冲突返回明确错误。
+- [x] 管理员可禁用 Client 和调整 Scope。
+- [x] 管理员可创建 Token，响应只在本次返回明文。
+- [x] Token 列表不返回明文或哈希。
+- [x] 管理员可撤销 Token，重复撤销保持幂等。
+- [x] 有效 Token 与正确 Scope 可通过鉴权。
+- [x] 无效、撤销、过期或禁用 Client Token 被统一拒绝。
+- [x] Scope 不足返回 `SCOPE_DENIED`。
+- [x] 成功鉴权更新 `last_used_at`。
+- [x] 审核模式缺失时读取为 `on`。
+- [x] 管理员可在 `on` 和 `off` 间切换审核模式。
+- [x] API Token 明文、哈希和 Authorization Header 不进入审计日志。
+- [x] 自动化测试覆盖 Token 格式、Bearer 解析、Scope 和审核模式策略。
+- [x] Lint、Typecheck、Vitest、Migration 零漂移、两次 D1 Migration、Next.js Build 和 OpenNext Build 全部通过。
+
+> 本任务只提供鉴权与发布策略底座。Hermes 研报 Upsert、幂等和导入日志将在 TASK-009 接入。
 
 ## 分支与 PR
 
 - 分支：`task/008-hermes-auth-review-mode`
-- Pull Request：待创建
+- Pull Request：#10
 - 验收通过后转为 Ready 并合并，再进入 TASK-009
