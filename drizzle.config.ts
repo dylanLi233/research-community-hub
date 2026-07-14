@@ -7,6 +7,7 @@ export default defineConfig({
     "./src/db/assets-schema.ts",
     "./src/db/reports-schema.ts",
     "./src/db/import-schema.ts",
+    "./src/db/events-schema.ts",
   ],
   out: "./drizzle/migrations",
   strict: true,
