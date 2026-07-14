@@ -47,10 +47,11 @@ export async function POST(request: NextRequest, context: RouteContext) {
     }
 
     let body: unknown = {};
+    const rawBody = await request.text();
 
-    if (request.headers.get("content-length") !== "0") {
+    if (rawBody.trim()) {
       try {
-        body = await request.json();
+        body = JSON.parse(rawBody);
       } catch {
         return apiError("INVALID_JSON", "请求体必须是有效的 JSON", 400);
       }
