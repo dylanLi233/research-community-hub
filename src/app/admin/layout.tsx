@@ -29,6 +29,7 @@ export default async function AdminLayout({
         </Link>
         <nav aria-label="后台导航">
           <Link href="/admin/users">用户与会员</Link>
+          <Link href="/admin/assets">素材库</Link>
           <Link href="/">返回网站</Link>
         </nav>
       </header>
