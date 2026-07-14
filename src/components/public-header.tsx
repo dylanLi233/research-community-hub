@@ -11,6 +11,7 @@ export function PublicHeader() {
         </Link>
         <nav className={styles.nav} aria-label="主导航">
           <Link href="/reports">研报</Link>
+          <Link href="/events">事件</Link>
           <Link href="/login?returnTo=/reports">登录</Link>
         </nav>
       </div>

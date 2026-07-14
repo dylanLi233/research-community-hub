@@ -12,9 +12,9 @@ const modules = [
   },
   {
     title: "重要事件",
-    description: "按周和月查看宏观、政策、产业与市场的重要时间节点。",
-    href: null,
-    status: "建设中",
+    description: "按周查看宏观、政策、央行、产业与市场的重要时间节点和重点观察。",
+    href: "/events",
+    status: "已开放",
   },
   {
     title: "宏观课程",
@@ -39,13 +39,13 @@ export default function Home() {
             <Link className="primary-link" href="/reports">
               浏览研报精选
             </Link>
-            <Link className="secondary-link" href="/login?returnTo=/reports">
-              登录会员账户
+            <Link className="secondary-link" href="/events">
+              查看本周重要事件
             </Link>
           </div>
           <div className="status" aria-label="项目状态">
             <span className="status-dot" aria-hidden="true" />
-            研报导入、审核与会员阅读链路已开放
+            研报阅读与重要事件时间表已开放
           </div>
         </section>
 
