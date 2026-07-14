@@ -32,6 +32,15 @@ jobs:
       - name: Type check
         run: npm run typecheck
 
+      - name: Validate Drizzle migrations
+        run: npm run db:check
+
+      - name: Apply migrations to local D1
+        run: npm run db:migrate:local
+
+      - name: Confirm migrations are idempotent
+        run: npm run db:migrate:local
+
       - name: Next.js build
         run: npm run build
 
