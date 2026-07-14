@@ -129,14 +129,15 @@ export function validateDeployConfig(config, options = {}) {
 
     for (const field of ["database_id", "preview_database_id"]) {
       const value = database[field];
-      const isAllowedPlaceholder = allowPlaceholders && value === ZERO_UUID;
 
-      if (!isAllowedPlaceholder && !isValidUuid(value)) {
+      if (value === ZERO_UUID) {
+        if (!allowPlaceholders) {
+          errors.push(
+            `D1 ${field} 仍是全零占位符，请创建 Cloudflare D1 后替换真实 UUID`,
+          );
+        }
+      } else if (!isValidUuid(value)) {
         errors.push(`D1 ${field} 必须是有效 UUID`);
-      } else if (!allowPlaceholders && value === ZERO_UUID) {
-        errors.push(
-          `D1 ${field} 仍是全零占位符，请创建 Cloudflare D1 后替换真实 UUID`,
-        );
       }
     }
   }
