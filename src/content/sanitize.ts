@@ -1,6 +1,5 @@
-import {
+import xss, {
   escapeAttrValue,
-  filterXSSWithResult,
   type IFilterXSSOptions,
 } from "xss";
 
@@ -129,21 +128,26 @@ export type SanitizedHtml = {
 
 export function sanitizeHtmlSegment(rawHtml: string): SanitizedHtml {
   const warnings: HtmlSanitizeWarning[] = [];
-  const result = filterXSSWithResult(rawHtml, {
+  const html = xss(rawHtml, {
     whiteList: ALLOWED_HTML,
     stripIgnoreTag: true,
     stripIgnoreTagBody: STRIP_TAG_BODIES,
     allowCommentTag: false,
     css: false,
-    onIgnoreTag(tag) {
+    onIgnoreTag(tag: string) {
       warnings.push({ code: "HTML_TAG_REMOVED", tag });
       return "";
     },
-    onIgnoreTagAttr(tag, attribute) {
+    onIgnoreTagAttr(tag: string, attribute: string) {
       warnings.push({ code: "HTML_ATTRIBUTE_REMOVED", tag, attribute });
       return "";
     },
-    onTagAttr(tag, attribute, value, isWhiteAttr) {
+    onTagAttr(
+      tag: string,
+      attribute: string,
+      value: string,
+      isWhiteAttr: boolean,
+    ) {
       if (!isWhiteAttr) {
         warnings.push({ code: "HTML_ATTRIBUTE_REMOVED", tag, attribute });
         return "";
@@ -216,23 +220,8 @@ export function sanitizeHtmlSegment(rawHtml: string): SanitizedHtml {
     },
   });
 
-  for (const removed of result.removed) {
-    if (removed.type === "tag") {
-      warnings.push({ code: "HTML_TAG_REMOVED", tag: removed.tag });
-    } else {
-      warnings.push({
-        code:
-          removed.attr === "href" || removed.attr === "src"
-            ? "HTML_URL_REMOVED"
-            : "HTML_ATTRIBUTE_REMOVED",
-        tag: removed.tag,
-        attribute: removed.attr,
-      });
-    }
-  }
-
   return {
-    html: result.html.trim(),
+    html: html.trim(),
     warnings: deduplicateWarnings(warnings),
   };
 }
