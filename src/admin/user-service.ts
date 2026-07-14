@@ -273,17 +273,23 @@ export async function createAdminUser(
   return created;
 }
 
+export function removesActiveAdmin(
+  target: { role: "member" | "admin"; status: "active" | "disabled" },
+  next: { role: "member" | "admin"; status: "active" | "disabled" },
+): boolean {
+  return (
+    target.role === "admin" &&
+    target.status === "active" &&
+    (next.role !== "admin" || next.status !== "active")
+  );
+}
+
 async function ensureAdminCanBeDeactivated(
   db: AppDatabase,
   target: { role: "member" | "admin"; status: "active" | "disabled" },
   next: { role: "member" | "admin"; status: "active" | "disabled" },
 ): Promise<void> {
-  const removesActiveAdmin =
-    target.role === "admin" &&
-    target.status === "active" &&
-    (next.role !== "admin" || next.status !== "active");
-
-  if (!removesActiveAdmin) {
+  if (!removesActiveAdmin(target, next)) {
     return;
   }
 
@@ -299,6 +305,17 @@ async function ensureAdminCanBeDeactivated(
       409,
     );
   }
+}
+
+async function revokeActiveSessions(
+  db: AppDatabase,
+  userId: string,
+  now: Date,
+): Promise<void> {
+  await db
+    .update(sessions)
+    .set({ revokedAt: now })
+    .where(and(eq(sessions.userId, userId), isNull(sessions.revokedAt)));
 }
 
 export async function updateAdminUser(
@@ -369,10 +386,7 @@ export async function updateAdminUser(
   }
 
   if (target.status === "active" && nextStatus === "disabled") {
-    await db
-      .update(sessions)
-      .set({ revokedAt: now })
-      .where(and(eq(sessions.userId, targetUserId), isNull(sessions.revokedAt)));
+    await revokeActiveSessions(db, targetUserId, now);
   }
 
   await writeAuditLog(db, {
@@ -428,10 +442,7 @@ export async function resetAdminUserPassword(
       updatedAt: now,
     })
     .where(eq(users.id, targetUserId));
-  await db
-    .update(sessions)
-    .set({ revokedAt: now })
-    .where(and(eq(sessions.userId, targetUserId), isNull(sessions.revokedAt)));
+  await revokeActiveSessions(db, targetUserId, now);
   await writeAuditLog(db, {
     actorType: "user",
     actorId: actorUserId,
@@ -455,11 +466,7 @@ export async function revokeAdminUserSessions(
     throw new AdminUserServiceError("USER_NOT_FOUND", "用户不存在", 404);
   }
 
-  const now = new Date();
-  await db
-    .update(sessions)
-    .set({ revokedAt: now })
-    .where(and(eq(sessions.userId, targetUserId), isNull(sessions.revokedAt)));
+  await revokeActiveSessions(db, targetUserId, new Date());
   await writeAuditLog(db, {
     actorType: "user",
     actorId: actorUserId,
