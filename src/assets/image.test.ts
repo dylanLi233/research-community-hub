@@ -154,7 +154,8 @@ describe("image content inspection", () => {
   });
 
   it("uses detected content instead of the supplied file extension", async () => {
-    const file = new File([png(4, 3)], "misleading.gif", {
+    const bytes = Uint8Array.from(png(4, 3));
+    const file = new File([bytes.buffer], "misleading.gif", {
       type: "image/gif",
     });
     const result = await validateImageFile(file);
