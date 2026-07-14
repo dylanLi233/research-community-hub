@@ -30,7 +30,23 @@ jobs:
         run: npm run lint
 
       - name: Type check
-        run: npm run typecheck
+        id: typecheck
+        continue-on-error: true
+        run: npm run typecheck > typecheck.log 2>&1
+
+      - name: Upload type check errors
+        if: steps.typecheck.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: typecheck-errors
+          path: typecheck.log
+          retention-days: 1
+
+      - name: Fail on type check errors
+        if: steps.typecheck.outcome == 'failure'
+        run: |
+          cat typecheck.log
+          exit 1
 
       - name: Validate Drizzle migrations
         run: npm run db:check
