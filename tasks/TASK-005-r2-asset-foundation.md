@@ -2,7 +2,7 @@
 
 ## 状态
 
-开发中
+已完成
 
 ## 目标
 
@@ -60,22 +60,24 @@
 
 ## 验收标准
 
-- [ ] `wrangler.jsonc` 与 Cloudflare Env 类型包含 `MEDIA_BUCKET`。
-- [ ] 本地和 CI 可以应用新增 Migration，重复执行不报错。
-- [ ] 管理员可通过 Multipart Form Data 上传合法图片。
-- [ ] 非管理员、未登录或跨源上传被拒绝。
-- [ ] 空文件、超过 10 MB、伪造 MIME、未知文件头被拒绝并返回机器可读错误。
-- [ ] API 不返回 R2 Object Key。
-- [ ] 管理员可以分页查看素材安全投影。
-- [ ] 匿名用户可读取 public 素材。
-- [ ] 有效会员可读取 member 素材，过期会员不可读取。
-- [ ] 只有管理员可读取 private 素材。
-- [ ] 受限素材未授权访问返回 404。
-- [ ] Public 素材支持 ETag 条件请求。
-- [ ] Lint、Typecheck、Vitest、Migration 零漂移、两次 D1 Migration、Next.js Build 和 OpenNext Build 全部通过。
+- [x] `wrangler.jsonc` 与 Cloudflare Env 类型包含 `MEDIA_BUCKET`。
+- [x] 本地和 CI 可以应用新增 Migration，重复执行不报错。
+- [x] 管理员可通过 Multipart Form Data 上传合法图片。
+- [x] 非管理员、未登录或跨源上传被拒绝。
+- [x] 空文件、超过 10 MB、伪造 MIME、未知文件头被拒绝并返回机器可读错误。
+- [x] API 不返回 R2 Object Key。
+- [x] 管理员可以分页查看素材安全投影。
+- [x] 匿名用户可读取 public 素材。
+- [x] 有效会员可读取 member 素材，过期会员不可读取。
+- [x] 只有管理员可读取 private 素材。
+- [x] 受限素材未授权访问返回 404。
+- [x] Public 素材支持 ETag 条件请求。
+- [x] Lint、Typecheck、Vitest、Migration 零漂移、两次 D1 Migration、Next.js Build 和 OpenNext Build 全部通过。
+
+> 本任务已完成代码级、策略级、Migration 与 Cloudflare 构建验收。真实远程 R2 Bucket 的上传冒烟测试在部署任务绑定正式资源后执行。
 
 ## 分支与 PR
 
 - 分支：`task/005-r2-asset-foundation`
-- Pull Request：待创建
+- Pull Request：#5
 - 验收通过后转为 Ready 并合并，再进入 TASK-006
