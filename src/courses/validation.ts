@@ -24,6 +24,7 @@ const tagsSchema = z
   .array(z.string().max(30))
   .max(10)
   .transform(normalizeReportTags);
+const accessLevelSchema = z.enum(["public", "member", "private"]);
 
 const courseFields = {
   title: z.string().trim().min(1).max(200),
@@ -34,7 +35,7 @@ const courseFields = {
   coverAssetId: z.uuid().nullable().optional(),
   instructorName: nullableTrimmed(120),
   tags: tagsSchema.default([]),
-  accessLevel: z.enum(["public", "member", "private"]).default("member"),
+  accessLevel: accessLevelSchema.default("member"),
   seoTitle: nullableTrimmed(200),
   seoDescription: nullableTrimmed(300),
 };
@@ -51,7 +52,7 @@ export const updateAdminCourseSchema = z
     coverAssetId: courseFields.coverAssetId,
     instructorName: courseFields.instructorName,
     tags: tagsSchema.optional(),
-    accessLevel: courseFields.accessLevel.optional(),
+    accessLevel: accessLevelSchema.optional(),
     seoTitle: courseFields.seoTitle,
     seoDescription: courseFields.seoDescription,
   })
@@ -64,7 +65,7 @@ const chapterFields = {
   slug: slugSchema,
   summary: z.string().trim().min(1).max(2000),
   bodyHtml: z.string().min(1),
-  accessLevel: z.enum(["public", "member", "private"]),
+  accessLevel: accessLevelSchema,
   previewMode: z.enum(["none", "paywall_marker", "summary_only"]),
   position: z.number().int().min(1).max(9999),
   estimatedMinutes: z.number().int().min(1).max(600).nullable().optional(),
@@ -94,7 +95,7 @@ export const courseListQuerySchema = z.object({
   status: z
     .enum(["draft", "pending_review", "published", "rejected", "archived"])
     .optional(),
-  accessLevel: z.enum(["public", "member", "private"]).optional(),
+  accessLevel: accessLevelSchema.optional(),
 });
 
 export type CreateAdminCourseInput = z.infer<typeof createAdminCourseSchema>;
