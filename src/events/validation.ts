@@ -154,6 +154,7 @@ function validateEventTiming(
     value.eventDate &&
     value.startsAt &&
     value.timezone &&
+    isValidIanaTimezone(value.timezone) &&
     dateInTimezone(value.startsAt, value.timezone) !== value.eventDate
   ) {
     context.addIssue({
