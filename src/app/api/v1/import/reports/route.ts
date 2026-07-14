@@ -1,6 +1,8 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
+import { generateId } from "@/auth/token";
+import type { AppDatabase } from "@/db/client";
 import {
   byteLength,
   hashImportRequest,
@@ -21,7 +23,6 @@ import {
 } from "@/imports/report-service";
 import { importReportSchema } from "@/imports/report-validation";
 import { requireApiClientRequest } from "@/integrations/auth";
-import { generateId } from "@/auth/token";
 import { validationDetails, type ApiErrorDetail } from "@/lib/api-response";
 
 export const dynamic = "force-dynamic";
@@ -50,19 +51,105 @@ function errorBody(input: {
   };
 }
 
-function response(body: ImportResponseBody, status: number) {
+function jsonResponse(body: ImportResponseBody, status: number) {
   return NextResponse.json(body, {
     status,
     headers: { "Cache-Control": "no-store" },
   });
 }
 
-async function persistFailure(input: {
-  db: Awaited<ReturnType<typeof requireApiClientRequest>> extends infer _T
-    ? never
-    : never;
-}): Promise<never> {
-  throw new Error(String(input));
+async function replayOrConflict(input: {
+  db: AppDatabase;
+  apiClientId: string;
+  idempotencyKey: string;
+  requestHash: string;
+  requestId: string;
+  clientRequestId: string | null;
+}): Promise<NextResponse | null> {
+  try {
+    const replay = await findImportReplay(
+      input.db,
+      input.apiClientId,
+      input.idempotencyKey,
+      input.requestHash,
+    );
+
+    return replay ? jsonResponse(replay.body, replay.httpStatus) : null;
+  } catch (error) {
+    if (error instanceof IdempotencyConflictError) {
+      return jsonResponse(
+        errorBody({
+          requestId: input.requestId,
+          clientRequestId: input.clientRequestId,
+          code: error.code,
+          message: error.message,
+          retryable: false,
+        }),
+        error.status,
+      );
+    }
+
+    throw error;
+  }
+}
+
+async function persistFailureResponse(input: {
+  db: AppDatabase;
+  apiClientId: string;
+  idempotencyKey: string;
+  requestHash: string;
+  requestId: string;
+  clientRequestId: string | null;
+  externalId?: string | null;
+  status: number;
+  code: string;
+  message: string;
+  retryable: boolean;
+  details?: ApiErrorDetail[];
+  startedAt: number;
+}): Promise<NextResponse> {
+  const body = errorBody({
+    requestId: input.requestId,
+    clientRequestId: input.clientRequestId,
+    code: input.code,
+    message: input.message,
+    retryable: input.retryable,
+    details: input.details,
+  });
+
+  try {
+    await recordImportFailure(input.db, {
+      requestId: input.requestId,
+      apiClientId: input.apiClientId,
+      idempotencyKey: input.idempotencyKey,
+      requestHash: input.requestHash,
+      endpoint: ENDPOINT,
+      externalId: input.externalId,
+      httpStatus: input.status,
+      errorCode: input.code,
+      responseData: body,
+      durationMs: Date.now() - input.startedAt,
+    });
+  } catch (error) {
+    const replay = await replayOrConflict(input);
+
+    if (replay) {
+      return replay;
+    }
+
+    throw error;
+  }
+
+  return jsonResponse(body, input.status);
+}
+
+function externalIdFromJson(value: unknown): string | null {
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+
+  const externalId = (value as Record<string, unknown>).external_id;
+  return typeof externalId === "string" && externalId ? externalId : null;
 }
 
 export async function POST(request: NextRequest) {
@@ -86,7 +173,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     if (error instanceof ImportRequestError) {
       const requestId = generateId();
-      return response(
+      return jsonResponse(
         errorBody({
           requestId,
           clientRequestId: null,
@@ -115,40 +202,32 @@ export async function POST(request: NextRequest) {
 
   if (byteLength(rawBody) > MAX_IMPORT_BODY_BYTES) {
     const requestHash = await hashImportRequest(rawBody);
-    const body = errorBody({
+    const replay = await replayOrConflict({
+      db: authorization.db,
+      apiClientId: authorization.client.id,
+      idempotencyKey,
+      requestHash,
       requestId,
       clientRequestId,
+    });
+
+    if (replay) {
+      return replay;
+    }
+
+    return persistFailureResponse({
+      db: authorization.db,
+      apiClientId: authorization.client.id,
+      idempotencyKey,
+      requestHash,
+      requestId,
+      clientRequestId,
+      status: 413,
       code: "PAYLOAD_TOO_LARGE",
       message: "请求体不能超过 1 MiB",
       retryable: false,
+      startedAt,
     });
-
-    try {
-      await recordImportFailure(authorization.db, {
-        requestId,
-        apiClientId: authorization.client.id,
-        idempotencyKey,
-        requestHash,
-        endpoint: ENDPOINT,
-        httpStatus: 413,
-        errorCode: "PAYLOAD_TOO_LARGE",
-        responseData: body,
-        durationMs: Date.now() - startedAt,
-      });
-    } catch {
-      const replay = await findImportReplay(
-        authorization.db,
-        authorization.client.id,
-        idempotencyKey,
-        requestHash,
-      );
-
-      if (replay) {
-        return response(replay.body, replay.httpStatus);
-      }
-    }
-
-    return response(body, 413);
   }
 
   let parsedJson: unknown;
@@ -157,116 +236,66 @@ export async function POST(request: NextRequest) {
     parsedJson = JSON.parse(rawBody);
   } catch {
     const requestHash = await hashImportRequest(rawBody);
-
-    try {
-      const replay = await findImportReplay(
-        authorization.db,
-        authorization.client.id,
-        idempotencyKey,
-        requestHash,
-      );
-
-      if (replay) {
-        return response(replay.body, replay.httpStatus);
-      }
-    } catch (error) {
-      if (error instanceof IdempotencyConflictError) {
-        return response(
-          errorBody({
-            requestId,
-            clientRequestId,
-            code: error.code,
-            message: error.message,
-            retryable: false,
-          }),
-          error.status,
-        );
-      }
-
-      throw error;
-    }
-
-    const body = errorBody({
-      requestId,
-      clientRequestId,
-      code: "INVALID_JSON",
-      message: "请求体必须是有效的 JSON",
-      retryable: false,
-    });
-    await recordImportFailure(authorization.db, {
-      requestId,
+    const replay = await replayOrConflict({
+      db: authorization.db,
       apiClientId: authorization.client.id,
       idempotencyKey,
       requestHash,
-      endpoint: ENDPOINT,
-      httpStatus: 400,
-      errorCode: "INVALID_JSON",
-      responseData: body,
-      durationMs: Date.now() - startedAt,
+      requestId,
+      clientRequestId,
     });
-    return response(body, 400);
+
+    if (replay) {
+      return replay;
+    }
+
+    return persistFailureResponse({
+      db: authorization.db,
+      apiClientId: authorization.client.id,
+      idempotencyKey,
+      requestHash,
+      requestId,
+      clientRequestId,
+      status: 400,
+      code: "INVALID_JSON",
+      message: "请求体必须是有效的 JSON",
+      retryable: false,
+      startedAt,
+    });
   }
 
   const requestHash = await hashImportRequest(parsedJson);
+  const replay = await replayOrConflict({
+    db: authorization.db,
+    apiClientId: authorization.client.id,
+    idempotencyKey,
+    requestHash,
+    requestId,
+    clientRequestId,
+  });
 
-  try {
-    const replay = await findImportReplay(
-      authorization.db,
-      authorization.client.id,
-      idempotencyKey,
-      requestHash,
-    );
-
-    if (replay) {
-      return response(replay.body, replay.httpStatus);
-    }
-  } catch (error) {
-    if (error instanceof IdempotencyConflictError) {
-      return response(
-        errorBody({
-          requestId,
-          clientRequestId,
-          code: error.code,
-          message: error.message,
-          retryable: false,
-        }),
-        error.status,
-      );
-    }
-
-    throw error;
+  if (replay) {
+    return replay;
   }
 
   const validated = importReportSchema.safeParse(parsedJson);
 
   if (!validated.success) {
-    const details = validationDetails(validated.error.issues);
-    const body = errorBody({
-      requestId,
-      clientRequestId,
-      code: "VALIDATION_FAILED",
-      message: "提交内容未通过校验",
-      retryable: false,
-      details,
-    });
-    await recordImportFailure(authorization.db, {
-      requestId,
+    return persistFailureResponse({
+      db: authorization.db,
       apiClientId: authorization.client.id,
       idempotencyKey,
       requestHash,
-      endpoint: ENDPOINT,
-      externalId:
-        parsedJson && typeof parsedJson === "object"
-          ? String(
-              (parsedJson as Record<string, unknown>).external_id ?? "",
-            ) || null
-          : null,
-      httpStatus: 400,
-      errorCode: "VALIDATION_FAILED",
-      responseData: body,
-      durationMs: Date.now() - startedAt,
+      requestId,
+      clientRequestId,
+      externalId: externalIdFromJson(parsedJson),
+      status: 400,
+      code: "VALIDATION_FAILED",
+      message: "提交内容未通过校验",
+      retryable: false,
+      details: validationDetails(validated.error.issues),
+      startedAt,
     });
-    return response(body, 400);
   }
 
   try {
@@ -280,32 +309,19 @@ export async function POST(request: NextRequest) {
       startedAt,
     });
 
-    return response(result.body, result.httpStatus);
+    return jsonResponse(result.body, result.httpStatus);
   } catch (error) {
-    try {
-      const replay = await findImportReplay(
-        authorization.db,
-        authorization.client.id,
-        idempotencyKey,
-        requestHash,
-      );
+    const concurrentReplay = await replayOrConflict({
+      db: authorization.db,
+      apiClientId: authorization.client.id,
+      idempotencyKey,
+      requestHash,
+      requestId,
+      clientRequestId,
+    });
 
-      if (replay) {
-        return response(replay.body, replay.httpStatus);
-      }
-    } catch (replayError) {
-      if (replayError instanceof IdempotencyConflictError) {
-        return response(
-          errorBody({
-            requestId,
-            clientRequestId,
-            code: replayError.code,
-            message: replayError.message,
-            retryable: false,
-          }),
-          replayError.status,
-        );
-      }
+    if (concurrentReplay) {
+      return concurrentReplay;
     }
 
     const serviceError =
@@ -316,32 +332,21 @@ export async function POST(request: NextRequest) {
             "研报导入暂时不可用",
             500,
           );
-    const body = errorBody({
+
+    return persistFailureResponse({
+      db: authorization.db,
+      apiClientId: authorization.client.id,
+      idempotencyKey,
+      requestHash,
       requestId,
       clientRequestId,
+      externalId: validated.data.externalId,
+      status: serviceError.status,
       code: serviceError.code,
       message: serviceError.message,
       retryable: serviceError.status >= 500,
       details: serviceError.details,
+      startedAt,
     });
-
-    try {
-      await recordImportFailure(authorization.db, {
-        requestId,
-        apiClientId: authorization.client.id,
-        idempotencyKey,
-        requestHash,
-        endpoint: ENDPOINT,
-        externalId: validated.data.externalId,
-        httpStatus: serviceError.status,
-        errorCode: serviceError.code,
-        responseData: body,
-        durationMs: Date.now() - startedAt,
-      });
-    } catch (recordError) {
-      console.error("Failed to record report import failure", recordError);
-    }
-
-    return response(body, serviceError.status);
   }
 }
