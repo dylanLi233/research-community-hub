@@ -1,7 +1,13 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { drizzle } from "drizzle-orm/d1";
 
-import * as schema from "./schema";
+import * as assetSchema from "./assets-schema";
+import * as coreSchema from "./schema";
+
+const schema = {
+  ...coreSchema,
+  ...assetSchema,
+};
 
 export function createDb(binding: D1Database) {
   return drizzle(binding, { schema });
