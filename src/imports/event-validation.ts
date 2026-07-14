@@ -91,7 +91,28 @@ export const importEventSchema = z
   })
   .transform((value) => {
     const event = createAdminEventSchema.parse(value.event);
-    return { externalId: value.externalId, event };
+
+    return {
+      externalId: value.externalId,
+      event: {
+        title: event.title,
+        eventDate: event.eventDate,
+        startsAt: event.startsAt ?? null,
+        endsAt: event.endsAt ?? null,
+        timezone: event.timezone,
+        allDay: event.allDay,
+        category: event.category,
+        importance: event.importance,
+        region: event.region ?? null,
+        summary: event.summary,
+        impact: event.impact ?? null,
+        focusPoints: event.focusPoints,
+        sourceName: event.sourceName ?? null,
+        sourceUrl: event.sourceUrl ?? null,
+        tags: event.tags,
+        accessLevel: event.accessLevel,
+      },
+    };
   });
 
 export type ImportEventInput = z.infer<typeof importEventSchema>;
