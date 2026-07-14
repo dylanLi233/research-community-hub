@@ -2,30 +2,52 @@
 
 面向炒股社群成员的会员制投研内容平台。
 
-## 产品范围
-
-- 研报精选：Hermes 通过 API 上传已加工完成的中文 HTML 内容
-- 重要事件：展示每周、每月宏观与市场事件
-- 宏观课程：18 章宏观经济基础课程
-- 会员权限：访客查看公开摘要或试读，会员查看完整内容
-- 管理后台：用户、内容、审核模式、导入日志管理
-
-## 技术方向
+## V1 技术架构
 
 - Next.js App Router + TypeScript
-- Cloudflare Workers（OpenNext）
+- Cloudflare Workers + OpenNext
 - Cloudflare D1
 - Cloudflare R2
-- Drizzle ORM
-- Zod
+- Drizzle ORM（后续任务接入）
+- Zod（后续任务接入）
 
-网站只负责内容接收、确定性校验、存储、审核、发布、权限控制和展示；不负责英文 PDF 的解析、翻译或 AI 加工。
+网站只负责接收、确定性校验、存储、审核、发布、权限控制和展示；不负责英文 PDF 的解析、翻译或 AI 加工。
+
+## 本地开发
+
+```bash
+npm install
+npm run dev
+```
+
+访问：
+
+- 首页：`http://localhost:3000`
+- 健康检查：`http://localhost:3000/api/health`
+
+## 构建检查
+
+```bash
+npm run lint
+npm run typecheck
+npm run build
+npm run cf:build
+```
+
+`npm run cf:build` 会使用 OpenNext 生成 Cloudflare Worker 构建产物。普通 `next dev` 运行在 Node.js，而正式部署运行在 Workers 的 `workerd`，因此两类构建都必须通过。
+
+## Cloudflare 预览与部署
+
+```bash
+npm run preview
+npm run deploy
+```
+
+D1 和 R2 资源将在后续任务创建并写入 `wrangler.jsonc`。
 
 ## 开发流程
 
 1. 每张任务卡使用独立分支。
 2. 每张任务卡创建独立 Pull Request。
-3. 测试与验收通过后再合并。
+3. 测试和验收通过后再合并。
 4. 当前任务未通过前，不进入下一张任务卡。
-
-详细 PRD、架构和任务卡将维护在 `docs/` 与 `tasks/` 目录。
