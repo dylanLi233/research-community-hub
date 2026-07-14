@@ -2,11 +2,11 @@
 
 ## 状态
 
-开发中
+验收中
 
 ## 目标
 
-实现适配 Cloudflare Workers 与 D1 的完整基础认证闭环：安全密码哈希、登录限流、服务端 Session、登录/退出、当前会话查询和首次修改密码。
+实现适配 Cloudflare Workers 与 D1 的完整基础认证闭环：安全密码哈希、登录限流、服务端 Session、登录/退出、当前会话查询、首次修改密码和首个管理员初始化。
 
 ## 范围
 
@@ -18,10 +18,12 @@
 - HttpOnly Cookie
 - 登录失败频率限制
 - 登录、退出、会话查询、修改密码 API
+- 仅空数据库可调用的一次性管理员 Bootstrap API
 - 登录页与修改密码页
 - 安全 Return URL 校验
-- 登录、退出、改密审计日志
-- 密码与 Session 单元测试
+- Cookie 写接口同源校验
+- 登录、退出、改密和初始化管理员审计日志
+- 密码、Token、限流和跳转规则单元测试
 - `auth_rate_limits` 数据库迁移
 
 ## 接口
@@ -30,6 +32,7 @@
 - `POST /api/auth/logout`
 - `GET /api/auth/session`
 - `POST /api/auth/change-password`
+- `POST /api/setup/admin`
 
 ## 页面
 
@@ -38,7 +41,7 @@
 
 ## 非范围
 
-- 管理员创建、编辑和续期用户
+- 管理员创建、编辑和续期其他用户
 - 会员有效性判断与会员内容权限
 - 自助注册
 - 忘记密码与邮件找回
@@ -59,24 +62,27 @@
 - Cookie：HttpOnly、SameSite=Lax、Path=/，生产环境 Secure。
 - 改密后撤销原有 Session 并签发新 Session。
 - Cookie 鉴权的写操作必须校验同源 `Origin`。
+- 登录限流只保存用户名和来源 IP 组合的哈希，不保存原始 IP。
+- 首管理员接口必须配置 Cloudflare Secret，并在数据库出现任意用户后永久关闭。
 
 ## 验收标准
 
-- [ ] 有效用户可以登录并得到 Session Cookie。
-- [ ] 错误用户名、错误密码和禁用账号返回相同 401 文案。
-- [ ] 连续失败达到阈值后返回 429 和 `Retry-After`。
-- [ ] 数据库中不存在明文密码和原始 Session Token。
-- [ ] `GET /api/auth/session` 只返回安全用户字段。
-- [ ] 退出后 Session 立即失效，Cookie 被清除。
-- [ ] 修改密码要求当前密码正确，并撤销旧 Session。
-- [ ] 首次改密后 `must_change_password=false`。
-- [ ] Return URL 不能跳转到站外地址。
-- [ ] 密码、Token Hash、Cookie 和跳转规则有自动化测试。
-- [ ] Migration 可在本地 D1 连续应用两次。
-- [ ] Lint、Typecheck、Vitest、Next.js Build、OpenNext Build 全部通过。
+- [x] 有效用户登录流程创建服务端 Session，并返回 HttpOnly Session Cookie。
+- [x] 错误用户名、错误密码和禁用账号使用相同 401 错误文案。
+- [x] 连续失败达到阈值后返回 429 和 `Retry-After`。
+- [x] 数据库中只保存密码哈希和 Session Token Hash。
+- [x] `GET /api/auth/session` 只返回安全用户字段。
+- [x] 退出会撤销 Session 并清除 Cookie。
+- [x] 修改密码要求当前密码正确，并撤销旧 Session。
+- [x] 首次改密后设置 `must_change_password=false`。
+- [x] Return URL 不能跳转到站外地址。
+- [x] 密码、Token、限流和跳转规则有自动化测试。
+- [x] 首管理员 Bootstrap 只允许空数据库并使用 Secret 鉴权。
+- [x] Migration 已由 Drizzle 生成，可在本地 D1 连续应用两次。
+- [ ] 最终只读 CI 的 Lint、Typecheck、Vitest、Next.js Build、OpenNext Build 全部通过。
 
 ## 分支与 PR
 
 - 分支：`task/003-authentication-sessions`
-- 独立 Draft Pull Request
-- 验收通过后合并，再进入 TASK-004
+- Pull Request：#3
+- 最终 CI 通过后转为 Ready 并合并，再进入 TASK-004
