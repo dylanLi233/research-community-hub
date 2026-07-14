@@ -3,6 +3,7 @@ import { drizzle } from "drizzle-orm/d1";
 
 import * as assetSchema from "./assets-schema";
 import * as coreSchema from "./schema";
+import * as courseSchema from "./courses-schema";
 import * as eventSchema from "./events-schema";
 import * as importSchema from "./import-schema";
 import * as reportSchema from "./reports-schema";
@@ -13,6 +14,7 @@ const schema = {
   ...reportSchema,
   ...importSchema,
   ...eventSchema,
+  ...courseSchema,
 };
 
 export function createDb(binding: D1Database) {
