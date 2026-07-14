@@ -50,6 +50,13 @@
       "when": 1784039732590,
       "tag": "0006_spooky_swarm",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1784041931955,
+      "tag": "0007_polite_la_nuit",
+      "breakpoints": true
     }
   ]
 }
