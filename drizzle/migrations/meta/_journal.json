@@ -29,6 +29,13 @@
       "when": 1784034521492,
       "tag": "0003_special_brother_voodoo",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1784036283824,
+      "tag": "0004_quick_mastermind",
+      "breakpoints": true
     }
   ]
 }
