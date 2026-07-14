@@ -2,7 +2,7 @@
 
 ## 状态
 
-开发中
+已完成
 
 ## 目标
 
@@ -50,23 +50,25 @@
 
 ## 验收标准
 
-- [ ] Script、Style、Iframe、Object、Embed、Form、SVG 等危险标签及内容被移除。
-- [ ] `onclick` 等事件属性和 `style` 被移除。
-- [ ] `javascript:`、`data:`、协议相对 URL 被移除。
-- [ ] 外链图片和非 `/media/{UUID}` 图片被移除 `src`。
-- [ ] 允许的标题、段落、列表、引用、表格、图片、链接、代码元素被保留。
-- [ ] 缺少或重复付费墙标记返回明确错误。
-- [ ] 非法访问级别与预览模式组合返回明确错误。
-- [ ] 清洗后空正文返回 `EMPTY_BODY_AFTER_SANITIZE`。
-- [ ] 访客只获得付费墙之前的清洗后 HTML。
-- [ ] 有效会员和管理员获得完整会员正文。
-- [ ] 非管理员无法获得 private 正文。
-- [ ] `summary_only` 访客获得空正文。
-- [ ] 自动化测试覆盖主要 XSS 和权限裁剪场景。
-- [ ] Lint、Typecheck、Vitest、Migration 零漂移、两次 D1 Migration、Next.js Build 和 OpenNext Build 全部通过。
+- [x] Script、Style、Iframe、Object、Embed、Form、SVG 等危险标签及内容被移除。
+- [x] `onclick` 等事件属性和 `style` 被移除。
+- [x] `javascript:`、`data:`、协议相对 URL 被移除。
+- [x] 外链图片和非 `/media/{UUID}` 图片被移除 `src`。
+- [x] 允许的标题、段落、列表、引用、表格、图片、链接、代码元素被保留。
+- [x] 缺少或重复付费墙标记返回明确错误。
+- [x] 非法访问级别与预览模式组合返回明确错误。
+- [x] 清洗后空正文返回 `EMPTY_BODY_AFTER_SANITIZE`。
+- [x] 访客只获得付费墙之前的清洗后 HTML。
+- [x] 有效会员和管理员获得完整会员正文。
+- [x] 非管理员无法获得 private 正文。
+- [x] `summary_only` 访客获得空正文。
+- [x] 自动化测试覆盖主要 XSS、嵌套危险标签和权限裁剪场景。
+- [x] Lint、Typecheck、Vitest、Migration 零漂移、两次 D1 Migration、Next.js Build 和 OpenNext Build 全部通过。
+
+> 本任务仅交付可复用的内容安全与裁剪底座。研报表、Hermes 导入接口和前台详情页在后续任务接入该模块。
 
 ## 分支与 PR
 
 - 分支：`task/006-html-paywall-foundation`
-- Pull Request：待创建
+- Pull Request：#7
 - 验收通过后转为 Ready 并合并，再进入 TASK-007
