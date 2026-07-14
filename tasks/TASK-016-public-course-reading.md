@@ -2,7 +2,7 @@
 
 ## 状态
 
-开发中
+已完成
 
 ## 目标
 
@@ -68,27 +68,29 @@
 
 ## 验收标准
 
-- [ ] `/courses` 只展示可公开访问的已发布课程。
-- [ ] private、未发布、归档、删除和未来发布时间课程不展示。
-- [ ] 课程详情只列出可见的已发布章节。
-- [ ] private、未发布、归档、删除和未来发布时间章节不展示。
-- [ ] public 章节访客可阅读全文。
-- [ ] member 章节访客只能看到公开试读或摘要。
-- [ ] 有效会员和管理员可查看完整 member 章节。
-- [ ] 过期、未开始和 inactive 会员无法查看完整正文。
-- [ ] mustChangePassword 用户被引导修改密码。
-- [ ] 未授权页面数据不包含付费墙后的内容。
-- [ ] 上一章、下一章按可见章节顺序正确计算。
-- [ ] SEO metadata 不包含会员正文。
-- [ ] 页面不展示内容哈希、external_id、API Client 或 R2 Object Key。
-- [ ] 首页与公共导航可进入课程列表。
-- [ ] 页面在桌面和移动端可阅读。
-- [ ] 页面使用 no-store / Cookie 隔离策略。
-- [ ] 自动化测试覆盖课程/章节可见性、受众裁剪、排序和泄露边界。
-- [ ] Lint、Typecheck、Vitest、Migration 零漂移、两次 D1 Migration、Next.js Build 和 OpenNext Build 全部通过。
+- [x] `/courses` 只展示可公开访问的已发布课程。
+- [x] private、未发布、归档、删除和未来发布时间课程不展示。
+- [x] 课程详情只列出可见的已发布章节。
+- [x] private、未发布、归档、删除和未来发布时间章节不展示。
+- [x] public 章节访客可阅读全文。
+- [x] member 章节访客只能看到公开试读或摘要。
+- [x] 有效会员和管理员可查看完整 member 章节。
+- [x] 过期、未开始和 inactive 会员无法查看完整正文。
+- [x] mustChangePassword 用户被引导修改密码。
+- [x] 未授权页面数据不包含付费墙后的内容。
+- [x] 上一章、下一章按可见章节顺序正确计算。
+- [x] SEO metadata 不包含会员正文。
+- [x] 页面不展示内容哈希、external_id、API Client 或 R2 Object Key。
+- [x] 首页与公共导航可进入课程列表。
+- [x] 页面在桌面和移动端可阅读。
+- [x] 页面使用 no-store / Cookie 隔离策略。
+- [x] 自动化测试覆盖课程/章节可见性、受众裁剪、排序和泄露边界。
+- [x] Lint、Typecheck、Vitest、Migration 零漂移、两次 D1 Migration、Next.js Build 和 OpenNext Build 全部通过。
+
+> 课程前台已与研报、事件模块形成完整内容站。下一阶段进入真实 Cloudflare D1、R2、环境变量和域名部署验收。
 
 ## 分支与 PR
 
 - 分支：`task/016-public-course-reading`
-- Pull Request：待创建
+- Pull Request：#18
 - 验收通过后转为 Ready 并合并，再进入部署验收
