@@ -6,9 +6,8 @@
 
 - Next.js App Router + TypeScript
 - Cloudflare Workers + OpenNext
-- Cloudflare D1
-- Cloudflare R2
-- Drizzle ORM（后续任务接入）
+- Cloudflare D1 + Drizzle ORM
+- Cloudflare R2（后续任务接入）
 - Zod（后续任务接入）
 
 网站只负责接收、确定性校验、存储、审核、发布、权限控制和展示；不负责英文 PDF 的解析、翻译或 AI 加工。
@@ -17,19 +16,53 @@
 
 ```bash
 npm install
+npm run db:migrate:local
 npm run dev
 ```
 
 访问：
 
 - 首页：`http://localhost:3000`
-- 健康检查：`http://localhost:3000/api/health`
+- 服务健康检查：`http://localhost:3000/api/health`
+- 数据库健康检查：`http://localhost:3000/api/health/database`
+
+OpenNext 在 `next dev` 中加载 Wrangler 本地平台环境，因此 Route Handler 可以访问本地 `DB` Binding。
+
+## 数据库
+
+Schema 位于：
+
+```text
+src/db/schema.ts
+```
+
+生成 Migration：
+
+```bash
+npm run db:generate
+npm run db:check
+```
+
+应用到本地 D1：
+
+```bash
+npm run db:migrate:local
+```
+
+应用到生产 D1：
+
+```bash
+npm run db:migrate:remote
+```
+
+`wrangler.jsonc` 当前使用全零 UUID 作为 D1 占位符，仅用于代码构建和本地数据库。创建真实 Cloudflare D1 后，必须将 `database_id` 和 `preview_database_id` 替换为真实值才能部署。
 
 ## 构建检查
 
 ```bash
 npm run lint
 npm run typecheck
+npm run db:check
 npm run build
 npm run cf:build
 ```
@@ -43,7 +76,7 @@ npm run preview
 npm run deploy
 ```
 
-D1 和 R2 资源将在后续任务创建并写入 `wrangler.jsonc`。
+R2 资源将在后续任务创建并写入 `wrangler.jsonc`。
 
 ## 开发流程
 

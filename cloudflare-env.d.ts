@@ -1,3 +1,4 @@
 interface CloudflareEnv {
-  ASSETS: Fetcher;
+  ASSETS?: Fetcher;
+  DB: D1Database;
 }
