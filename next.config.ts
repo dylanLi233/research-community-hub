@@ -24,6 +24,10 @@ const nextConfig: NextConfig = {
         source: "/events/:path*",
         headers: privateCookieHeaders,
       },
+      {
+        source: "/courses/:path*",
+        headers: privateCookieHeaders,
+      },
     ];
   },
 };
