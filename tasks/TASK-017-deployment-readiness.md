@@ -2,7 +2,7 @@
 
 ## 状态
 
-开发中
+已完成
 
 ## 目标
 
@@ -45,20 +45,22 @@
 
 ## 验收标准
 
-- [ ] `npm run deploy:check` 在全零 D1 ID 下失败并给出明确修复提示。
-- [ ] 配置检查在有效生产配置下通过。
-- [ ] CI 可在保留仓库占位 ID 时验证配置结构。
-- [ ] `npm run deploy` 在构建和上传前执行配置检查。
-- [ ] `public/_headers` 为 `/_next/static/*` 设置 immutable 一年缓存。
-- [ ] 部署手册包含 D1、R2、Migration、Worker、Secret、Bootstrap、冒烟检查和域名步骤。
-- [ ] 部署手册不包含真实 Secret、账号、D1 UUID 或密码。
-- [ ] README 不再把 R2、研报、事件和课程描述为后续功能。
-- [ ] `.dev.vars.example` 明确本地开发环境与 Bootstrap Secret。
-- [ ] 自动化测试覆盖占位 ID、Binding 缺失和有效配置。
-- [ ] Lint、Typecheck、Vitest、Migration 零漂移、两次 D1 Migration、Next.js Build 和 OpenNext Build 全部通过。
+- [x] `npm run deploy:check` 在全零 D1 ID 下失败并给出明确修复提示。
+- [x] 配置检查在有效生产配置下通过。
+- [x] CI 可在保留仓库占位 ID 时验证配置结构。
+- [x] `npm run deploy` 在构建和上传前执行配置检查。
+- [x] `public/_headers` 为 `/_next/static/*` 设置 immutable 一年缓存。
+- [x] 部署手册包含 D1、R2、Migration、Worker、Secret、Bootstrap、冒烟检查和域名步骤。
+- [x] 部署手册不包含真实 Secret、账号、D1 UUID 或密码。
+- [x] README 不再把 R2、研报、事件和课程描述为后续功能。
+- [x] `.dev.vars.example` 明确本地开发环境与 Bootstrap Secret。
+- [x] 自动化测试覆盖占位 ID、Binding 缺失和有效配置。
+- [x] Lint、Typecheck、Vitest、Migration 零漂移、两次 D1 Migration、Next.js Build 和 OpenNext Build 全部通过。
+
+> 仓库已经具备生产部署前的静态安全检查和完整上线 Runbook。下一步需要在用户自己的 Cloudflare 账号中创建真实 D1、R2 和 Worker 资源，并按 `docs/CLOUDFLARE_DEPLOYMENT.md` 执行。
 
 ## 分支与 PR
 
 - 分支：`task/017-deployment-readiness`
-- Pull Request：待创建
+- Pull Request：#19
 - 验收通过后转为 Ready 并合并，随后进入真实 Cloudflare 部署
