@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import "./home.css";
 import { PublicFooter, PublicHeader } from "@/components/public-header";
 
 const modules = [
