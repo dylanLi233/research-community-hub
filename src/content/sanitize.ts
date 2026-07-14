@@ -1,5 +1,6 @@
 import xss, {
   escapeAttrValue,
+  parseTag,
   type IFilterXSSOptions,
 } from "xss";
 
@@ -34,28 +35,40 @@ const ALLOWED_HTML: NonNullable<IFilterXSSOptions["whiteList"]> = {
 };
 
 const ALLOWED_TAG_NAMES = new Set(Object.keys(ALLOWED_HTML));
-const STRIP_TAG_BODIES = [
+const DANGEROUS_CONTAINER_TAGS = new Set([
   "script",
   "style",
   "iframe",
   "object",
-  "embed",
   "form",
   "button",
-  "input",
   "textarea",
   "select",
   "option",
   "svg",
   "math",
   "template",
-];
+]);
+const DANGEROUS_VOID_TAGS = new Set(["embed", "input"]);
+const DANGEROUS_TAGS = new Set([
+  ...DANGEROUS_CONTAINER_TAGS,
+  ...DANGEROUS_VOID_TAGS,
+]);
 
 const MEDIA_URL_PATTERN =
   /^\/media\/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const UNSAFE_URL_CHARACTER_PATTERN = /[\u0000-\u0020\u007f\\]/;
 const ENCODED_URL_TOKEN_PATTERN = /&(?:#x?[0-9a-f]+|[a-z][a-z0-9]+);/i;
-const HTML_TAG_PATTERN = /<\/?\s*([a-z][a-z0-9:-]*)\b[^>]*>/gi;
+
+type HtmlRange = {
+  start: number;
+  end: number;
+};
+
+type DangerousTagFrame = {
+  tag: string;
+  start: number;
+};
 
 function warningKey(warning: HtmlSanitizeWarning): string {
   return `${warning.code}:${warning.tag ?? ""}:${warning.attribute ?? ""}`;
@@ -78,17 +91,99 @@ function deduplicateWarnings(
   });
 }
 
-function collectIgnoredTagWarnings(
-  rawHtml: string,
-  warnings: HtmlSanitizeWarning[],
-): void {
-  for (const match of rawHtml.matchAll(HTML_TAG_PATTERN)) {
-    const tag = match[1]?.toLowerCase();
+function mergeRanges(ranges: HtmlRange[]): HtmlRange[] {
+  const sorted = ranges
+    .filter((range) => range.end > range.start)
+    .sort((left, right) => left.start - right.start || left.end - right.end);
+  const merged: HtmlRange[] = [];
 
-    if (tag && !ALLOWED_TAG_NAMES.has(tag)) {
-      warnings.push({ code: "HTML_TAG_REMOVED", tag });
+  for (const range of sorted) {
+    const previous = merged.at(-1);
+
+    if (previous && range.start <= previous.end) {
+      previous.end = Math.max(previous.end, range.end);
+    } else {
+      merged.push({ ...range });
     }
   }
+
+  return merged;
+}
+
+function removeRanges(rawHtml: string, ranges: HtmlRange[]): string {
+  const merged = mergeRanges(ranges);
+  let cursor = 0;
+  let output = "";
+
+  for (const range of merged) {
+    output += rawHtml.slice(cursor, range.start);
+    cursor = Math.max(cursor, range.end);
+  }
+
+  return output + rawHtml.slice(cursor);
+}
+
+function stripDangerousTagBodies(
+  rawHtml: string,
+  warnings: HtmlSanitizeWarning[],
+): string {
+  const ranges: HtmlRange[] = [];
+  const stack: DangerousTagFrame[] = [];
+
+  parseTag(
+    rawHtml,
+    (sourcePosition, _position, tag, tagHtml, isClosing) => {
+      const normalizedTag = tag.toLowerCase();
+
+      if (normalizedTag && !ALLOWED_TAG_NAMES.has(normalizedTag)) {
+        warnings.push({ code: "HTML_TAG_REMOVED", tag: normalizedTag });
+      }
+
+      if (!DANGEROUS_TAGS.has(normalizedTag)) {
+        return tagHtml;
+      }
+
+      const tagEnd = sourcePosition + tagHtml.length;
+      const isSelfClosing =
+        DANGEROUS_VOID_TAGS.has(normalizedTag) || /\/\s*>$/.test(tagHtml);
+
+      if (!isClosing) {
+        if (isSelfClosing) {
+          ranges.push({ start: sourcePosition, end: tagEnd });
+        } else {
+          stack.push({ tag: normalizedTag, start: sourcePosition });
+        }
+
+        return tagHtml;
+      }
+
+      let matchingIndex = -1;
+
+      for (let index = stack.length - 1; index >= 0; index -= 1) {
+        if (stack[index]?.tag === normalizedTag) {
+          matchingIndex = index;
+          break;
+        }
+      }
+
+      if (matchingIndex === -1) {
+        ranges.push({ start: sourcePosition, end: tagEnd });
+        return tagHtml;
+      }
+
+      const start = stack[matchingIndex]?.start ?? sourcePosition;
+      stack.splice(matchingIndex);
+      ranges.push({ start, end: tagEnd });
+      return tagHtml;
+    },
+    (value) => value,
+  );
+
+  for (const unclosedTag of stack) {
+    ranges.push({ start: unclosedTag.start, end: rawHtml.length });
+  }
+
+  return removeRanges(rawHtml, ranges);
 }
 
 function isSafeLinkUrl(value: string): boolean {
@@ -143,12 +238,10 @@ export type SanitizedHtml = {
 
 export function sanitizeHtmlSegment(rawHtml: string): SanitizedHtml {
   const warnings: HtmlSanitizeWarning[] = [];
-  collectIgnoredTagWarnings(rawHtml, warnings);
-
-  const html = xss(rawHtml, {
+  const bodySafeHtml = stripDangerousTagBodies(rawHtml, warnings);
+  const html = xss(bodySafeHtml, {
     whiteList: ALLOWED_HTML,
     stripIgnoreTag: true,
-    stripIgnoreTagBody: STRIP_TAG_BODIES,
     allowCommentTag: false,
     css: false,
     onIgnoreTagAttr(tag: string, attribute: string) {
