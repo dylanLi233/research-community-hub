@@ -1,3 +1,4 @@
+import { dateInTimezone } from "./validation";
 import { isValidCalendarDate } from "@/reports/validation";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -32,7 +33,7 @@ export function resolveEventWeek(
   requestedDate: string | null,
   now = new Date(),
 ): EventWeek {
-  const fallback = formatUtcDate(now);
+  const fallback = dateInTimezone(now, "Asia/Shanghai");
   const sourceDate =
     requestedDate && isValidCalendarDate(requestedDate)
       ? requestedDate
