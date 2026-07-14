@@ -6,7 +6,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   verify:
@@ -15,9 +15,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
-          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -28,17 +25,6 @@ jobs:
 
       - name: Install dependencies
         run: npm install --no-audit --no-fund
-
-      - name: Commit TASK-006 package lock
-        if: github.event_name == 'pull_request' && github.head_ref == 'task/006-html-paywall-foundation'
-        run: |
-          if [ -n "$(git status --porcelain -- package-lock.json)" ]; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add package-lock.json
-            git commit -m "chore: lock HTML sanitizer dependency"
-            git push origin HEAD:${{ github.head_ref }}
-          fi
 
       - name: Lint
         run: npm run lint
