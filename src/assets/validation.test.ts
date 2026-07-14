@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import { MAX_ASSET_BYTES } from "./constants";
 import {
-  AssetValidationError,
   detectAssetMimeType,
   normalizeOriginalFilename,
   validateAssetFile,
@@ -49,7 +48,7 @@ describe("asset validation", () => {
       validateAssetFile(
         new File([jpegBytes], "fake.png", { type: "image/png" }),
       ),
-    ).rejects.toMatchObject<Partial<AssetValidationError>>({
+    ).rejects.toMatchObject({
       code: "ASSET_MIME_MISMATCH",
       status: 400,
     });
