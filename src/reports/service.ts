@@ -6,6 +6,7 @@ import {
   inArray,
   isNull,
   like,
+  ne,
   or,
   type SQL,
 } from "drizzle-orm";
@@ -23,10 +24,10 @@ import type {
   UpdateAdminReportInput,
 } from "./validation";
 import { generateId } from "@/auth/token";
-import { ContentHtmlError } from "@/content/types";
 import { prepareContentHtml } from "@/content/pipeline";
-import type { AppDatabase } from "@/db/client";
+import { ContentHtmlError } from "@/content/types";
 import { assets } from "@/db/assets-schema";
+import type { AppDatabase } from "@/db/client";
 import { researchReports } from "@/db/reports-schema";
 import { auditLogs } from "@/db/schema";
 import type { ApiErrorDetail } from "@/lib/api-response";
@@ -44,6 +45,7 @@ export class ReportServiceError extends Error {
 }
 
 type ReportInputState = ReportHashInput;
+type ReportWarnings = ReturnType<typeof prepareContentHtml>["warnings"];
 
 export type AdminReportSummary = {
   id: string;
@@ -139,7 +141,7 @@ async function ensureSlugAvailable(
   const conditions: SQL[] = [eq(researchReports.slug, slug)];
 
   if (excludingReportId) {
-    conditions.push(sqlNotEqual(researchReports.id, excludingReportId));
+    conditions.push(ne(researchReports.id, excludingReportId));
   }
 
   const existing = await db
@@ -153,10 +155,6 @@ async function ensureSlugAvailable(
       { field: "slug", code: "SLUG_CONFLICT", message: "Slug 必须全站唯一" },
     ]);
   }
-}
-
-function sqlNotEqual<T>(column: SQL.Aliased<T> | unknown, value: string): SQL {
-  return sql`${column} <> ${value}`;
 }
 
 async function validateAssets(
@@ -195,8 +193,7 @@ async function validateAssets(
 async function prepareReportState(
   db: AppDatabase,
   input: ReportInputState,
-): Promise<{ state: ReportInputState; warnings: ReturnType<typeof prepareContentHtml>["warnings"] }>
-{
+): Promise<{ state: ReportInputState; warnings: ReportWarnings }> {
   let prepared: ReturnType<typeof prepareContentHtml>;
 
   try {
@@ -348,7 +345,7 @@ export async function createAdminReport(
   db: AppDatabase,
   actorUserId: string,
   input: CreateAdminReportInput,
-): Promise<{ report: AdminReportView; warnings: ReturnType<typeof prepareContentHtml>["warnings"] }> {
+): Promise<{ report: AdminReportView; warnings: ReportWarnings }> {
   await ensureSlugAvailable(db, input.slug);
   const prepared = await prepareReportState(db, createInputState(input));
   const now = new Date();
@@ -377,7 +374,10 @@ export async function createAdminReport(
     }),
   ]);
 
-  return { report: await getAdminReport(db, reportId), warnings: prepared.warnings };
+  return {
+    report: await getAdminReport(db, reportId),
+    warnings: prepared.warnings,
+  };
 }
 
 export async function updateAdminReport(
@@ -385,7 +385,7 @@ export async function updateAdminReport(
   actorUserId: string,
   reportId: string,
   input: UpdateAdminReportInput,
-): Promise<{ report: AdminReportView; warnings: ReturnType<typeof prepareContentHtml>["warnings"] }> {
+): Promise<{ report: AdminReportView; warnings: ReportWarnings }> {
   const current = await getReportRow(db, reportId);
   const merged = mergeUpdateInput(current, input);
 
@@ -418,7 +418,10 @@ export async function updateAdminReport(
     }),
   ]);
 
-  return { report: await getAdminReport(db, reportId), warnings: prepared.warnings };
+  return {
+    report: await getAdminReport(db, reportId),
+    warnings: prepared.warnings,
+  };
 }
 
 export async function publishAdminReport(
